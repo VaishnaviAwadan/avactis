@@ -1,71 +1,57 @@
 package com.avactis.base;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Properties;
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Parameters;
+import java.util.concurrent.TimeUnit;
+
+import com.avactis.actiondriver.ActionClass;
+import com.avactis.base.BaseClass;
 
 public class BaseClass {
-    public WebDriver driver;
-    public Properties properties;
-    public WebDriverWait wait;
 
-    @BeforeClass
-    public void setUp() {
-        loadProperties();
-        initializeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().window().maximize();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        driver.get(properties.getProperty("baseUrl"));
-    }
+    public static WebDriver driver;
+    public ActionClass  action;
 
-    @AfterClass
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
-
-    private void loadProperties() {
-        properties = new Properties();
-        try {
-            FileInputStream input = new FileInputStream("config.properties");
-            properties.load(input);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initializeDriver() {
-        String browser = properties.getProperty("browser");
+    @Parameters("browser")
+    @BeforeMethod
+    public void setUp(String browser) {
+        // Initialize the WebDriver based on the browser type
         if (browser.equalsIgnoreCase("chrome")) {
-            System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+            System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") + "/drivers/chromedriver.exe");
             driver = new ChromeDriver();
         } else if (browser.equalsIgnoreCase("firefox")) {
-            System.setProperty("webdriver.gecko.driver", "path/to/geckodriver");
+            System.setProperty("webdriver.gecko.driver", System.getProperty("user.dir") + "/drivers/geckodriver.exe");
             driver = new FirefoxDriver();
+        } else if (browser.equalsIgnoreCase("edge")) {
+            System.setProperty("webdriver.edge.driver", System.getProperty("user.dir") + "/drivers/msedgedriver.exe");
+            driver = new EdgeDriver();
         } else {
-            throw new IllegalArgumentException("Browser not supported: " + browser);
+            throw new IllegalArgumentException("Browser \"" + browser + "\" not supported.");
         }
+
+        // Maximize the window
+        driver.manage().window().maximize();
+
+        // Set implicit wait
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+        // Initialize the Action class
+        action = new ActionClass(driver);
+
+        // Launch the application
+        driver.get("http://localhost/avactis/avactis-system/admin/signin.php");
     }
 
-    public void takeScreenshot(String fileName) {
-        TakesScreenshot ts = (TakesScreenshot) driver;
-        try {
-            FileUtils.copyFile(ts.getScreenshotAs(OutputType.FILE), new File("screenshots/" + fileName + ".png"));
-        } catch (IOException e) {
-            e.printStackTrace();
+    @AfterMethod
+    public void tearDown() {
+        // Close the browser after each test
+        if (driver != null) {
+            driver.quit();
         }
     }
 }

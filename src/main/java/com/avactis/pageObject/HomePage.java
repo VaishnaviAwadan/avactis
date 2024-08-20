@@ -1,4 +1,4 @@
-package com.avactis.pages;
+package com.avactis.pageObject;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

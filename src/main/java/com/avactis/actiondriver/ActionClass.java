@@ -1,56 +1,80 @@
 package com.avactis.actiondriver;
 
+import java.time.Duration;
 
-	import java.io.FileInputStream;
-	import java.io.IOException;
-	import java.util.Properties;
-	import org.openqa.selenium.WebDriver;
-	import org.openqa.selenium.WebElement;
-	import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
-	public class ActionClass {
-	    private WebDriver driver;
-	    private Properties properties;
+public class ActionClass {
 
-	    public ActionClass(WebDriver driver) {
-	        this.driver = driver;
-	        loadProperties();
-	    }
+    private WebDriver driver;
 
-	    private void loadProperties() {
-	        properties = new Properties();
-	        try {
-	            FileInputStream input = new FileInputStream("config.properties");
-	            properties.load(input);
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
+    public ActionClass(WebDriver driver) {
+        this.driver = driver;
+    }
 
-	    public void navigateToBaseUrl() {
-	        String baseUrl = properties.getProperty("url");
-	        driver.get(baseUrl);
-	    }
+    // Click an element
+    public void click(WebElement element) {
+        element.click();
+    }
 
-	    public void performHoverAction(WebElement element) {
-	        Actions actions = new Actions(driver);
-	        actions.moveToElement(element).perform();
-	    }
+    // Send keys to an element
+    public void sendKeys(WebElement element, String text) {
+        element.sendKeys(text);
+    }
 
-	    public void performClickAction(WebElement element) {
-	        Actions actions = new Actions(driver);
-	        actions.moveToElement(element).click().perform();
-	    }
+    // Hover over an element
+    public void hover(WebElement element) {
+        Actions actions = new Actions(driver);
+        actions.moveToElement(element).perform();
+    }
 
-	    public void performDoubleClickAction(WebElement element) {
-	        Actions actions = new Actions(driver);
-	        actions.moveToElement(element).doubleClick().perform();
-	    }
+    // Scroll to an element
+    public void scrollToElement(WebElement element) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("arguments[0].scrollIntoView(true);", element);
+    }
 
-	    public void performRightClickAction(WebElement element) {
-	        Actions actions = new Actions(driver);
-	        actions.moveToElement(element).contextClick().perform();
-	    }
+    // Wait until element is visible
+    public void waitForVisibility(WebElement element, Duration timeoutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.until(ExpectedConditions.visibilityOf(element));
+    }
 
-	
-	}
+    // Drag and drop from source to target
+    public void dragAndDrop(WebElement source, WebElement target) {
+        Actions actions = new Actions(driver);
+        actions.dragAndDrop(source, target).perform();
+    }
+
+    // Right-click on an element
+    public void rightClick(WebElement element) {
+        Actions actions = new Actions(driver);
+        actions.contextClick(element).perform();
+    }
+
+    // Double-click on an element
+    public void doubleClick(WebElement element) {
+        Actions actions = new Actions(driver);
+        actions.doubleClick(element).perform();
+    }
+
+    // Check if an element is displayed
+    public boolean isDisplayed(WebElement element) {
+        return element.isDisplayed();
+    }
+
+    // Check if an element is enabled
+    public boolean isEnabled(WebElement element) {
+        return element.isEnabled();
+    }
+
+    // Check if an element is selected
+    public boolean isSelected(WebElement element) {
+        return element.isSelected();
+    }
+}
